@@ -1,0 +1,25 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  PutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs16.x
+      Handler: index.handler
+      CodeUri: put-endpoint/
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTable
+
+  UsersTable:
+    Type: AWS::Serverless::SimpleTable
+
+  WriteFunctionConnector:
+    Type: AWS::Serverless::Connector
+    Properties:
+      Source:
+        Id: PutFunction
+      Destination:
+        Id: UsersTable
+      Permissions:
+        - Write
