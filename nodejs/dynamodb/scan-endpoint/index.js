@@ -21,8 +21,7 @@ const getAllUsers = async () => {
   return output;
 };
 
-exports.handler = async (event, context) => {
-  const docClient = new AWS.DynamoDB.DocumentClient();
+exports.handler = async () => {
   const userList = await getAllUsers();
 
   return {

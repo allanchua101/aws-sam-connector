@@ -1,0 +1,34 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  SampleBucket:
+    Type: AWS::S3::Bucket
+
+  #
+  # PUT Function
+  #
+  CreateSignedUploadUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs16.x
+      Handler: index.handler
+      CodeUri: create-signed-upload-url/
+      Environment:
+        Variables:
+          SAMPLE_BUCKET_NAME: !Ref SampleBucket
+      Events:
+        PutResource:
+          Type: "Api"
+          Properties:
+            Path: "/file/create-signed-upload-url"
+            Method: "PUT"
+
+  FunctionToBucketConnector:
+    Type: AWS::Serverless::Connector
+    Properties:
+      Source:
+        Id: CreateSignedUploadUrlFunction
+      Destination:
+        Id: SampleBucket
+      Permissions:
+        - Write
