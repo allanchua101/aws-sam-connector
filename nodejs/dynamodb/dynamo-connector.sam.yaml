@@ -1,6 +1,12 @@
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  UsersTable:
+    Type: AWS::Serverless::SimpleTable
+
+  #
+  # PUT Function
+  #
   PutFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -10,11 +16,14 @@ Resources:
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTable
+      Events:
+        PutResource:
+          Type: "Api"
+          Properties:
+            Path: "/events/put"
+            Method: "PUT"
 
-  UsersTable:
-    Type: AWS::Serverless::SimpleTable
-
-  WriteFunctionConnector:
+  PutFunctionToDynamoConnector:
     Type: AWS::Serverless::Connector
     Properties:
       Source:
@@ -23,3 +32,32 @@ Resources:
         Id: UsersTable
       Permissions:
         - Write
+
+  #
+  # Scan Function
+  #
+  ScanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs16.x
+      Handler: index.handler
+      CodeUri: scan-endpoint/
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTable
+      Events:
+        GetResource:
+          Type: "Api"
+          Properties:
+            Path: "/events"
+            Method: "GET"
+
+  ScanFunctionToDynamoConnector:
+    Type: AWS::Serverless::Connector
+    Properties:
+      Source:
+        Id: ScanFunction
+      Destination:
+        Id: UsersTable
+      Permissions:
+        - Read
